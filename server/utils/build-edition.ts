@@ -14,15 +14,30 @@ type CuratorConfig = {
   geminiWebPrompt?: string
 }
 
+async function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  label: string,
+  fallback: T
+): Promise<T> {
+  const timeout = new Promise<T>((resolve) => {
+    setTimeout(() => {
+      console.warn(`[build-edition] ${label} timed out after ${timeoutMs}ms`)
+      resolve(fallback)
+    }, timeoutMs)
+  })
+  return Promise.race([promise, timeout]).catch((e) => {
+    console.warn(`[build-edition] ${label} failed:`, e)
+    return fallback
+  })
+}
+
 export async function buildAndStoreEdition(config: CuratorConfig): Promise<EditionPayload> {
   const dateKey = editionDateKey()
 
   const [raw, hciRaw] = await Promise.all([
     fetchArxivRecent(48),
-    fetchSemanticScholarHCI(25).catch((e) => {
-      console.warn('[build-edition] Semantic Scholar failed:', e)
-      return [] as SciencePaper[]
-    })
+    withTimeout(fetchSemanticScholarHCI(25), 8000, 'Semantic Scholar', [] as SciencePaper[])
   ])
 
   const { papers, usedLLM } = await curateWithOptionalLLM(
@@ -37,7 +52,12 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
   const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
   if (gKey && gPrompt) {
     const model = (config.geminiModel || 'gemini-2.5-flash').trim()
-    const result = await fetchGeminiWebDigest(gKey, model, gPrompt)
+    const result = await withTimeout(
+      fetchGeminiWebDigest(gKey, model, gPrompt),
+      10000,
+      'Gemini web digest',
+      null
+    )
     if (result) {
       geminiPapers = result.papers.map((p) => ({ ...p, source: 'gemini' }))
       geminiSearchQueries = result.searchQueries

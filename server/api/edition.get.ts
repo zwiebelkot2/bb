@@ -3,6 +3,13 @@ import { buildAndStoreEdition } from '../utils/build-edition'
 import { fetchGeminiWebDigest } from '../utils/gemini-web-digest'
 import { resolveGeminiWebPrompt } from '../utils/load-gemini-prompt'
 
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
+  const timeout = new Promise<T>((resolve) => {
+    setTimeout(() => resolve(fallback), timeoutMs)
+  })
+  return Promise.race([promise, timeout]).catch(() => fallback)
+}
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig(event)
   const query = getQuery(event)
@@ -33,7 +40,7 @@ export default defineEventHandler(async (event) => {
     const missingGemini = !cached.geminiPapers?.length
     if (gKey && gPrompt && missingGemini) {
       const model = (config.geminiModel || 'gemini-2.5-flash').trim()
-      const result = await fetchGeminiWebDigest(gKey, model, gPrompt)
+      const result = await withTimeout(fetchGeminiWebDigest(gKey, model, gPrompt), 3000, null)
       if (result?.papers?.length) {
         const merged = {
           ...cached,
