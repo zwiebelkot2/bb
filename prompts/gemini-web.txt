@@ -1,0 +1,34 @@
+Find exactly 25 recent research papers (published 2024 or later — nothing older).
+
+Topic areas (the selection may focus on just one or a few — not all need to be covered at once):
+- Design (Interaction Design, Speculative Design, Foresight)
+- Human-Computer Interaction (HCI)
+- Governance & Policy
+- Computer Science / Artificial Intelligence
+- Biology, Biodiversity, Ecosystems, Algae
+- Chemistry & Natural Sciences
+
+Prefer papers from: MIT, Harvard, Oxford, Cambridge, Caltech, Stanford, ETH Zurich, Nature, Nature Human Behaviour, ACM CHI, ACM UIST, Science, PNAS.
+
+For each of the 25 papers, return EXACTLY this JSON format (no prose, no free text, only valid JSON):
+
+{
+  "papers": [
+    {
+      "title": "Original title of the paper",
+      "titleDe": "German translation of the title",
+      "authors": ["Lastname, F.", "Lastname, F."],
+      "year": 2024,
+      "abstract": "English summary, 2–4 sentences",
+      "source": "Journal / Conference / Preprint server",
+      "url": "https://doi.org/... or https://arxiv.org/abs/... or direct URL",
+      "category": "HCI | Design | Governance | Computer Science | Biology | Chemistry | Natural Sciences"
+    }
+  ]
+}
+
+Rules:
+- ONLY real, verifiable papers (found via web search). Do not invent titles or authors.
+- If you find fewer than 25, return as many as possible (at least 15).
+- Summaries in English.
+- No free text outside of the JSON.
