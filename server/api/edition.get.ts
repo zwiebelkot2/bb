@@ -47,7 +47,11 @@ export default defineEventHandler(async (event) => {
           geminiPapers: result.papers.map((p) => ({ ...p, source: 'gemini' as const })),
           geminiSearchQueries: result.searchQueries
         }
-        await writeEdition(merged)
+        try {
+          await writeEdition(merged)
+        } catch (e) {
+          console.warn('[edition] cache update failed:', e)
+        }
         return merged
       }
     }

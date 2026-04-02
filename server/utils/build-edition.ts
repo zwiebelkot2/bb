@@ -75,6 +75,11 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
     hciPapers: hciPapers.length ? hciPapers : undefined,
     geminiSearchQueries
   }
-  await writeEdition(payload)
+  try {
+    await writeEdition(payload)
+  } catch (e) {
+    // Do not fail the request if cache write is unavailable in serverless runtime.
+    console.warn('[build-edition] cache write failed:', e)
+  }
   return payload
 }

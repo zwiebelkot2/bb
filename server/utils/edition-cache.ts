@@ -2,7 +2,9 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import type { EditionPayload } from '../types/paper'
 
-const CACHE_DIR = join(process.cwd(), '.data')
+const CACHE_DIR = process.env.VERCEL
+  ? '/tmp/lnews-data'
+  : join(process.cwd(), '.data')
 
 function editionFile(dateKey: string) {
   return join(CACHE_DIR, `edition-${dateKey}.json`)
