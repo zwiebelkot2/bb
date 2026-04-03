@@ -4,7 +4,14 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/tailwind.css'],
   nitro: {
-    preset: 'vercel'
+    preset: 'vercel',
+    // Allow long Gemini + arXiv + Semantic Scholar work in one invocation (cron / refresh).
+    // Vercel Hobby still caps at 10s unless you upgrade; Pro supports up to 60s+.
+    vercel: {
+      functions: {
+        maxDuration: 60
+      }
+    }
   },
   app: {
     head: {

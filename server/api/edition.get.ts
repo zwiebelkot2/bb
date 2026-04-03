@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     const missingGemini = !cached.geminiPapers?.length
     if (gKey && gPrompt && missingGemini) {
       const model = (config.geminiModel || 'gemini-2.5-flash').trim()
-      const result = await withTimeout(fetchGeminiWebDigest(gKey, model, gPrompt), 3000, null)
+      const result = await withTimeout(fetchGeminiWebDigest(gKey, model, gPrompt), 25_000, null)
       if (result?.papers?.length) {
         const merged = {
           ...cached,
