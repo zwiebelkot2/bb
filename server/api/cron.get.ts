@@ -1,4 +1,5 @@
 import { buildAndStoreEdition } from '../utils/build-edition'
+import { resolveGeminiApiKey } from '../utils/resolve-gemini-key'
 
 /**
  * Vercel Cron: runs daily at 9:00 AM UTC.
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
   const edition = await buildAndStoreEdition({
     openaiApiKey: config.openaiApiKey,
     scienceCuratorPrompt: config.scienceCuratorPrompt,
-    geminiApiKey: config.geminiApiKey,
+    geminiApiKey: resolveGeminiApiKey(config),
     geminiModel: config.geminiModel,
     geminiWebPrompt: config.geminiWebPrompt
   })

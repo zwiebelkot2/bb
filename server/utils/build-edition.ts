@@ -4,6 +4,7 @@ import { curateWithOptionalLLM } from './curate-llm'
 import { fetchGeminiWebDigest } from './gemini-web-digest'
 import { fetchSemanticScholarHCI } from './semantic-scholar'
 import { resolveGeminiWebPrompt } from './load-gemini-prompt'
+import { resolveGeminiApiKey } from './resolve-gemini-key'
 import type { EditionPayload, SciencePaper } from '../types/paper'
 
 type CuratorConfig = {
@@ -49,7 +50,7 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
   let geminiPapers: SciencePaper[] = []
   let geminiSearchQueries: string[] | undefined
   let geminiStatus: EditionPayload['geminiStatus'] = 'not-configured'
-  const gKey = config.geminiApiKey?.trim()
+  const gKey = resolveGeminiApiKey(config)
   const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
   if (gKey && gPrompt) {
     geminiStatus = 'unavailable'

@@ -2,6 +2,7 @@ import { editionDateKey, isSameEditionDay, readCachedEdition, writeEdition } fro
 import { buildAndStoreEdition } from '../utils/build-edition'
 import { fetchGeminiWebDigest } from '../utils/gemini-web-digest'
 import { resolveGeminiWebPrompt } from '../utils/load-gemini-prompt'
+import { resolveGeminiApiKey } from '../utils/resolve-gemini-key'
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, fallback: T): Promise<T> {
   const timeout = new Promise<T>((resolve) => {
@@ -35,7 +36,7 @@ export default defineEventHandler(async (event) => {
 
   const cached = await readCachedEdition(dateKey)
   if (!force && isSameEditionDay(cached, dateKey) && cached) {
-    const gKey = config.geminiApiKey?.trim()
+    const gKey = resolveGeminiApiKey(config)
     const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
     const missingGemini = !cached.geminiPapers?.length
     if (gKey && gPrompt && missingGemini) {
@@ -62,7 +63,7 @@ export default defineEventHandler(async (event) => {
   return buildAndStoreEdition({
     openaiApiKey: config.openaiApiKey,
     scienceCuratorPrompt: config.scienceCuratorPrompt,
-    geminiApiKey: config.geminiApiKey,
+    geminiApiKey: resolveGeminiApiKey(config),
     geminiModel: config.geminiModel,
     geminiWebPrompt: config.geminiWebPrompt
   })
