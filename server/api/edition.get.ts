@@ -45,6 +45,7 @@ export default defineEventHandler(async (event) => {
         const merged = {
           ...cached,
           geminiPapers: result.papers.map((p) => ({ ...p, source: 'gemini' as const })),
+          geminiStatus: 'ok' as const,
           geminiSearchQueries: result.searchQueries
         }
         try {

@@ -12,6 +12,13 @@
         <time :datetime="edition.fetchedAt" class="text-ink">{{ fetchedLabel }}</time>
       </p>
 
+      <div
+        v-if="geminiNotice"
+        class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
+      >
+        {{ geminiNotice }}
+      </div>
+
       <template v-if="edition.geminiPapers?.length">
         <div class="mb-3 sm:mb-4 flex flex-wrap items-baseline justify-between gap-2">
           <h2 class="font-sans text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-accent">
@@ -26,6 +33,13 @@
         </div>
         <hr class="mb-8 sm:mb-14 border-double border-ink" />
       </template>
+
+      <div
+        v-if="hciNotice"
+        class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
+      >
+        {{ hciNotice }}
+      </div>
 
       <template v-if="edition.hciPapers?.length">
         <div class="mb-3 sm:mb-4 flex flex-wrap items-baseline justify-between gap-2">
@@ -73,5 +87,24 @@ const fetchedLabel = computed(() => {
     timeStyle: 'short',
     timeZone: 'Europe/Berlin'
   }).format(new Date(edition.value.fetchedAt))
+})
+
+const geminiNotice = computed(() => {
+  if (!edition.value || edition.value.geminiPapers?.length) return ''
+  if (edition.value.geminiStatus === 'not-configured') {
+    return 'Gemini web source is not configured yet. Add GEMINI_API_KEY in Vercel project settings.'
+  }
+  if (edition.value.geminiStatus === 'unavailable') {
+    return 'Gemini web source is temporarily unavailable (quota, timeout, or upstream issue).'
+  }
+  return ''
+})
+
+const hciNotice = computed(() => {
+  if (!edition.value || edition.value.hciPapers?.length) return ''
+  if (edition.value.hciStatus === 'unavailable') {
+    return 'Semantic Scholar source is temporarily unavailable (rate limit or timeout).'
+  }
+  return ''
 })
 </script>

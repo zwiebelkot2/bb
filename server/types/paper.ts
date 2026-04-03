@@ -20,8 +20,12 @@ export interface EditionPayload {
   curatedWithLLM: boolean
   /** Gemini-Websuche: strukturierte Paper */
   geminiPapers?: SciencePaper[]
+  /** Gemini-Status: ok | not-configured | unavailable */
+  geminiStatus?: 'ok' | 'not-configured' | 'unavailable'
   /** Semantic Scholar HCI-Papers */
   hciPapers?: SciencePaper[]
+  /** HCI-Status: ok | unavailable */
+  hciStatus?: 'ok' | 'unavailable'
   /** Suchanfragen die Gemini ausgeführt hat */
   geminiSearchQueries?: string[]
 }

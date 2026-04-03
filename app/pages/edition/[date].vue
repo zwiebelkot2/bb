@@ -13,6 +13,13 @@
     <div v-if="pending" class="text-muted">Loading…</div>
     <div v-else-if="error" class="text-muted">Edition not found.</div>
     <template v-else-if="edition">
+      <div
+        v-if="geminiNotice"
+        class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
+      >
+        {{ geminiNotice }}
+      </div>
+
       <template v-if="edition.geminiPapers?.length">
         <h3 class="mb-3 sm:mb-4 font-sans text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-accent">
           Daily Research · Web Search
@@ -22,6 +29,13 @@
         </div>
         <hr class="mb-8 sm:mb-14 border-double border-ink" />
       </template>
+
+      <div
+        v-if="hciNotice"
+        class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
+      >
+        {{ hciNotice }}
+      </div>
 
       <template v-if="edition.hciPapers?.length">
         <h3 class="mb-3 sm:mb-4 font-sans text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-accent">
@@ -67,5 +81,24 @@ const formattedDate = computed(() => {
   } catch {
     return dateKey.value
   }
+})
+
+const geminiNotice = computed(() => {
+  if (!edition.value || edition.value.geminiPapers?.length) return ''
+  if (edition.value.geminiStatus === 'not-configured') {
+    return 'Gemini web source was not configured on this edition.'
+  }
+  if (edition.value.geminiStatus === 'unavailable') {
+    return 'Gemini web source was unavailable for this edition.'
+  }
+  return ''
+})
+
+const hciNotice = computed(() => {
+  if (!edition.value || edition.value.hciPapers?.length) return ''
+  if (edition.value.hciStatus === 'unavailable') {
+    return 'Semantic Scholar source was unavailable for this edition.'
+  }
+  return ''
 })
 </script>

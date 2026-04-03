@@ -48,9 +48,11 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
 
   let geminiPapers: SciencePaper[] = []
   let geminiSearchQueries: string[] | undefined
+  let geminiStatus: EditionPayload['geminiStatus'] = 'not-configured'
   const gKey = config.geminiApiKey?.trim()
   const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
   if (gKey && gPrompt) {
+    geminiStatus = 'unavailable'
     const model = (config.geminiModel || 'gemini-2.5-flash').trim()
     const result = await withTimeout(
       fetchGeminiWebDigest(gKey, model, gPrompt),
@@ -58,13 +60,15 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
       'Gemini web digest',
       null
     )
-    if (result) {
+    if (result?.papers?.length) {
       geminiPapers = result.papers.map((p) => ({ ...p, source: 'gemini' }))
       geminiSearchQueries = result.searchQueries
+      geminiStatus = 'ok'
     }
   }
 
   const hciPapers = hciRaw.map((p) => ({ ...p, source: 'semantic-scholar' }))
+  const hciStatus: EditionPayload['hciStatus'] = hciPapers.length ? 'ok' : 'unavailable'
 
   const payload: EditionPayload = {
     dateKey,
@@ -72,7 +76,9 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
     papers: papers.map((p) => ({ ...p, source: 'arxiv' })),
     curatedWithLLM: usedLLM,
     geminiPapers: geminiPapers.length ? geminiPapers : undefined,
+    geminiStatus,
     hciPapers: hciPapers.length ? hciPapers : undefined,
+    hciStatus,
     geminiSearchQueries
   }
   try {
