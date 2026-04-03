@@ -49,11 +49,10 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
 
   let geminiPapers: SciencePaper[] = []
   let geminiSearchQueries: string[] | undefined
-  let geminiStatus: EditionPayload['geminiStatus'] = 'not-configured'
   const gKey = resolveGeminiApiKey(config)
   const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
+  let geminiStatus: EditionPayload['geminiStatus'] = gKey ? 'unavailable' : 'not-configured'
   if (gKey && gPrompt) {
-    geminiStatus = 'unavailable'
     const model = (config.geminiModel || 'gemini-2.5-flash').trim()
     const result = await withTimeout(
       fetchGeminiWebDigest(gKey, model, gPrompt),
