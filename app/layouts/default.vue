@@ -37,7 +37,7 @@
     <footer class="border-t border-double border-ink bg-paper px-4 py-6 sm:py-8 pb-safe-bottom text-center text-xs sm:text-sm text-muted">
       <p class="font-serif text-ink">Lnews</p>
       <p class="mt-2 max-w-measure mx-auto px-2 leading-relaxed">
-        Sources: arXiv, Semantic Scholar, Gemini web search. Not a peer-review substitute; original papers linked.
+        Sources: arXiv and Semantic Scholar. Not a peer-review substitute; original papers linked.
       </p>
     </footer>
   </div>

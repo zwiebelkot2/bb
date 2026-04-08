@@ -5,8 +5,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
   nitro: {
     preset: 'vercel',
-    // Allow long Gemini + arXiv + Semantic Scholar work in one invocation (cron / refresh).
-    // Vercel Hobby still caps at 10s unless you upgrade; Pro supports up to 60s+.
+    // Keep maxDuration generous for slower upstreams.
     vercel: {
       functions: {
         maxDuration: 60
@@ -21,7 +20,7 @@ export default defineNuxtConfig({
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content: 'A daily digest of cutting-edge research papers from arXiv, Semantic Scholar, and web search — curated by AI.'
+          content: 'A daily digest of cutting-edge research papers from arXiv and Semantic Scholar.'
         }
       ],
       link: [
@@ -35,12 +34,6 @@ export default defineNuxtConfig({
     }
   },
   runtimeConfig: {
-    openaiApiKey: process.env.NUXT_OPENAI_API_KEY || process.env.OPENAI_API_KEY || '',
-    scienceCuratorPrompt: process.env.NUXT_SCIENCE_CURATOR_PROMPT || '',
-    refreshSecret: process.env.NUXT_REFRESH_SECRET || '',
-    geminiApiKey: process.env.NUXT_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '',
-    geminiModel: process.env.NUXT_GEMINI_MODEL || 'gemini-2.5-flash',
-    geminiWebPrompt: process.env.NUXT_GEMINI_WEB_PROMPT || '',
-    cronSecret: process.env.CRON_SECRET || ''
+    // Secrets & prompt-driven logic intentionally removed for now.
   }
 })

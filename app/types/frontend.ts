@@ -16,9 +16,6 @@ export interface Edition {
   fetchedAt: string
   papers: Paper[]
   curatedWithLLM: boolean
-  geminiPapers?: Paper[]
-  geminiStatus?: 'ok' | 'not-configured' | 'unavailable'
   hciPapers?: Paper[]
   hciStatus?: 'ok' | 'unavailable'
-  geminiSearchQueries?: string[]
 }

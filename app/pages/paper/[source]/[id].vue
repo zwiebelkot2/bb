@@ -71,8 +71,6 @@ const paper = computed((): Paper | undefined => {
 function poolForSource(src: string): Paper[] {
   if (!edition.value) return []
   switch (src) {
-    case 'gemini':
-      return edition.value.geminiPapers ?? []
     case 'semantic-scholar':
       return edition.value.hciPapers ?? []
     default:

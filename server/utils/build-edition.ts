@@ -1,22 +1,12 @@
 import { fetchArxivRecent } from './arxiv'
 import { editionDateKey, writeEdition } from './edition-cache'
-import { curateWithOptionalLLM } from './curate-llm'
-import { fetchGeminiWebDigest } from './gemini-web-digest'
 import { fetchSemanticScholarHCI } from './semantic-scholar'
-import { resolveGeminiWebPrompt } from './load-gemini-prompt'
-import { resolveGeminiApiKey } from './resolve-gemini-key'
 import type { EditionPayload, SciencePaper } from '../types/paper'
 
-/** Must stay below Nitro `vercel.functions.maxDuration` (see nuxt.config). */
-const GEMINI_FETCH_TIMEOUT_MS = 55_000
 const SEMANTIC_SCHOLAR_TIMEOUT_MS = 22_000
 
 type CuratorConfig = {
-  openaiApiKey?: string
-  scienceCuratorPrompt?: string
-  geminiApiKey?: string
-  geminiModel?: string
-  geminiWebPrompt?: string
+  // bewusst leer: Cron/Prompt/LLM-Logik wird später wieder integriert
 }
 
 async function withTimeout<T>(
@@ -40,41 +30,15 @@ async function withTimeout<T>(
 export async function buildAndStoreEdition(config: CuratorConfig): Promise<EditionPayload> {
   const dateKey = editionDateKey()
 
-  const gKey = resolveGeminiApiKey(config)
-  const gPrompt = await resolveGeminiWebPrompt(config.geminiWebPrompt)
-  let geminiStatus: EditionPayload['geminiStatus'] = gKey ? 'unavailable' : 'not-configured'
-
-  const model = (config.geminiModel || 'gemini-2.5-flash').trim()
-  const geminiPromise =
-    gKey && gPrompt
-      ? withTimeout(
-          fetchGeminiWebDigest(gKey, model, gPrompt),
-          GEMINI_FETCH_TIMEOUT_MS,
-          'Gemini web digest',
-          null
-        )
-      : Promise.resolve(null)
-
-  // Run arXiv, Semantic Scholar, and Gemini in parallel so total wall time fits Vercel maxDuration.
-  const [raw, hciRaw, geminiResult] = await Promise.all([
+  // Run arXiv and Semantic Scholar in parallel.
+  const [raw, hciRaw] = await Promise.all([
     fetchArxivRecent(48),
-    withTimeout(fetchSemanticScholarHCI(25), SEMANTIC_SCHOLAR_TIMEOUT_MS, 'Semantic Scholar', [] as SciencePaper[]),
-    geminiPromise
+    withTimeout(fetchSemanticScholarHCI(25), SEMANTIC_SCHOLAR_TIMEOUT_MS, 'Semantic Scholar', [] as SciencePaper[])
   ])
 
-  const { papers, usedLLM } = await curateWithOptionalLLM(
-    raw,
-    config.openaiApiKey,
-    config.scienceCuratorPrompt
-  )
-
-  let geminiPapers: SciencePaper[] = []
-  let geminiSearchQueries: string[] | undefined
-  if (geminiResult?.papers?.length) {
-    geminiPapers = geminiResult.papers.map((p) => ({ ...p, source: 'gemini' }))
-    geminiSearchQueries = geminiResult.searchQueries
-    geminiStatus = 'ok'
-  }
+  // Keine LLM-Curation: deterministische Shortlist.
+  const papers = raw.slice(0, 18)
+  const usedLLM = false
 
   const hciPapers = hciRaw.map((p) => ({ ...p, source: 'semantic-scholar' }))
   const hciStatus: EditionPayload['hciStatus'] = hciPapers.length ? 'ok' : 'unavailable'
@@ -84,11 +48,8 @@ export async function buildAndStoreEdition(config: CuratorConfig): Promise<Editi
     fetchedAt: new Date().toISOString(),
     papers: papers.map((p) => ({ ...p, source: 'arxiv' })),
     curatedWithLLM: usedLLM,
-    geminiPapers: geminiPapers.length ? geminiPapers : undefined,
-    geminiStatus,
     hciPapers: hciPapers.length ? hciPapers : undefined,
-    hciStatus,
-    geminiSearchQueries
+    hciStatus
   }
   try {
     await writeEdition(payload)

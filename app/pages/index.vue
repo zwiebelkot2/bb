@@ -13,28 +13,6 @@
       </p>
 
       <div
-        v-if="geminiNotice"
-        class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
-      >
-        {{ geminiNotice }}
-      </div>
-
-      <template v-if="edition.geminiPapers?.length">
-        <div class="mb-3 sm:mb-4 flex flex-wrap items-baseline justify-between gap-2">
-          <h2 class="font-sans text-[11px] sm:text-xs font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] text-accent">
-            Daily Research · Web Search
-          </h2>
-          <span class="text-[10px] uppercase tracking-wide text-muted">
-            {{ edition.geminiPapers.length }} papers · 2024+
-          </span>
-        </div>
-        <div class="mb-8 sm:mb-14 grid gap-6 sm:gap-10 md:grid-cols-2 lg:grid-cols-3">
-          <PaperCard v-for="p in edition.geminiPapers" :key="p.arxivId" :paper="p" />
-        </div>
-        <hr class="mb-8 sm:mb-14 border-double border-ink" />
-      </template>
-
-      <div
         v-if="hciNotice"
         class="mb-4 rounded border border-rule bg-white px-4 py-3 text-sm text-muted"
       >
@@ -87,17 +65,6 @@ const fetchedLabel = computed(() => {
     timeStyle: 'short',
     timeZone: 'Europe/Berlin'
   }).format(new Date(edition.value.fetchedAt))
-})
-
-const geminiNotice = computed(() => {
-  if (!edition.value || edition.value.geminiPapers?.length) return ''
-  if (edition.value.geminiStatus === 'not-configured') {
-    return 'Gemini web source is not configured yet. Add GEMINI_API_KEY in Vercel project settings.'
-  }
-  if (edition.value.geminiStatus === 'unavailable') {
-    return 'Gemini web source is temporarily unavailable (quota, timeout, or upstream issue).'
-  }
-  return ''
 })
 
 const hciNotice = computed(() => {
